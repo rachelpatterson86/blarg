@@ -13,6 +13,11 @@ module Blarg
       serialize :tags
     end
 
+    class Tags
+    end
+
+    class PoastTagging#instance when tag and post match
+
     class InitializeDatabase < V 1.0
       def self.up
         create_table Post.table_name do |t|
@@ -38,6 +43,9 @@ module Blarg
         rename_column Post.table_name, :date, :written
       end
     end
+
+    class AddTagsTable < V 1.2
+      def self.up
   end
 end
 
@@ -196,22 +204,23 @@ end
 
 #top_tags: A method that prints a sorted list of the top 10 most used tags in my blog along with a count of how many times they were used.
 def top_tags
-  results = {}
-  Blarg::Models::Post.each do |post|
+  results = {} #Hash.new(0)
+  Blarg::Models::Post.find_each do |post| #find_each for tables
     post.tags.each do |ind_tag|
-    results[ind_tag] += 1
+      results[ind_tag] += 1
+    end
   end
-  top_ten = results.sort_by{|k,v| v}.reverse.first(10)
-  puts top_10
-end
-
+  top_ten = results.sort_by{|k,v| v}.reverse.first(10).to_h #can use -v instead of reverse
+  #tack on to_h, why array of array bad? harder to access if data needs to be pulled in other ways
+  puts top_ten
+  end
 #top_months: A method that prints a sorted list of the top 6 months ranked by number of posts.
-def top_months
+def top_months #all wrong..
   results = {}
-  Blarg::Models::Post.each do |post|
+  Blarg::Models::Post.find_each do |post|
   post.date.each do |d|
     date = Date._parse(d.to_s)
-    date[:mday] = 0 #this is a hash but db is datetime... dont know how to link yo line 214
+    date[:mday] = 0 #this is a hash but db is datetime... dont know how to link to line 214
   end
   datetime_records = Blarg::Models::Post.select("date,count(id)").group("date").first(6)
   puts datetime_records
